@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_hightouch_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_hightouch';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class HightouchResult {
+  /// Creates a result.
   const HightouchResult({
     this.workspaceId,
     this.sourceSlug,
@@ -73,8 +74,13 @@ class HightouchResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class HightouchCallResult<T> {
+  /// Creates a call result.
   const HightouchCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final HightouchResult? result;
 }
@@ -100,62 +106,62 @@ Future<T> tracedHightouch<T>({
   final span = _tracer().startSpan(
     'hightouch $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
     if (r.result != null) {
       final extras = <Attribute<Object>>[];
       if (r.result!.workspaceId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.workspace.id',
           r.result!.workspaceId!,
         ));
       }
       if (r.result!.sourceSlug != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.source.slug',
           r.result!.sourceSlug!,
         ));
       }
       if (r.result!.modelId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.model.id',
           r.result!.modelId!,
         ));
       }
       if (r.result!.modelName != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.model.name',
           r.result!.modelName!,
         ));
       }
       if (r.result!.syncId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.sync.id',
           r.result!.syncId!,
         ));
       }
       if (r.result!.destinationSlug != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.destination.slug',
           r.result!.destinationSlug!,
         ));
       }
       if (r.result!.syncRunId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.sync_run.id',
           r.result!.syncRunId!,
         ));
       }
       if (r.result!.syncMode != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.sync.mode',
           r.result!.syncMode!,
         ));
       }
       if (r.result!.runStatus != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'hightouch.run.status',
           r.result!.runStatus!,
         ));
@@ -168,43 +174,43 @@ Future<T> tracedHightouch<T>({
         }
       }
       if (r.result!.queryRows != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'hightouch.query.rows',
           r.result!.queryRows!,
         ));
       }
       if (r.result!.addedRows != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'hightouch.added.rows',
           r.result!.addedRows!,
         ));
       }
       if (r.result!.changedRows != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'hightouch.changed.rows',
           r.result!.changedRows!,
         ));
       }
       if (r.result!.removedRows != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'hightouch.removed.rows',
           r.result!.removedRows!,
         ));
       }
       if (r.result!.rejectedRows != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'hightouch.rejected.rows',
           r.result!.rejectedRows!,
         ));
       }
       if (r.result!.attemptCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'hightouch.attempt.count',
           r.result!.attemptCount!,
         ));
       }
       if (r.result!.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           r.result!.statusCode!,
         ));
@@ -215,13 +221,13 @@ Future<T> tracedHightouch<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
